@@ -269,14 +269,58 @@ void AP_VideoTX::update_all_power_dbm(uint8_t nlevels, const uint8_t power[])
 }
 
 // set the power in mw
-void AP_VideoTX::set_power_mw(uint16_t power)
+void AP_VideoTX::set_power_mw(uint8_t power, PowerActive active)
 {
+    if (power == _power_levels[_current_power].mw
+        && _power_levels[_current_power].active == active) {
+        return;
+    }
+
     for (uint8_t i = 0; i < VTX_MAX_POWER_LEVELS; i++) {
         if (power == _power_levels[i].mw) {
             _current_power = i;
-            break;
+            _power_levels[i].active = active;
+            debug("learned power %ddbm", power);
+            // now unlearn the "other" power level since we have no other way of guessing
+            // the supported levels
+            if ((_power_levels[i].level & 0xF0) == 0x10) {
+                _power_levels[i].level = _power_levels[i].level & 0xF;
+            }
+            if (i > 0 && _power_levels[i-1].level == _power_levels[i].level) {
+                debug("invalidated power %ddbm, level %d is now %ddbm", _power_levels[i-1].dbm, _power_levels[i].level, _power_levels[i].dbm);
+                _power_levels[i-1].level = 0xFF;
+                _power_levels[i-1].active = PowerActive::Inactive;
+            } else if (i < VTX_MAX_POWER_LEVELS-1 && _power_levels[i+1].level == _power_levels[i].level) {
+                debug("invalidated power %dbm, level %d is now %dbm", _power_levels[i+1].dbm, _power_levels[i].level, _power_levels[i].dbm);
+                _power_levels[i+1].level = 0xFF;
+                _power_levels[i+1].active = PowerActive::Inactive;
+            }
+            return;
         }
     }
+    // learn the non-standard power
+    _current_power = update_power_mw(power, active);
+}
+
+uint8_t AP_VideoTX::update_power_mw(uint8_t power, PowerActive active)
+{
+    for (uint8_t i = 0; i < VTX_MAX_POWER_LEVELS; i++) {
+        if (power == _power_levels[i].mw) {
+            if (_power_levels[i].active != active) {
+                _power_levels[i].active = active;
+                debug("%s power %dmw", active == PowerActive::Active ? "learned" : "invalidated", power);
+            }
+            return i;
+        }
+    }
+    // handed a non-standard value, use the last slot
+    _power_levels[VTX_MAX_POWER_LEVELS-1].mw = power;
+    _power_levels[VTX_MAX_POWER_LEVELS-1].level = 255;
+    _power_levels[VTX_MAX_POWER_LEVELS-1].dac = 255;
+    _power_levels[VTX_MAX_POWER_LEVELS-1].dbm = uint16_t(roundf(10 * log10(mw)));
+    _power_levels[VTX_MAX_POWER_LEVELS-1].active = active;
+    debug("non-standard power %dmw -> %ddbm", power, _power_levels[VTX_MAX_POWER_LEVELS-1].dbm);
+    return VTX_MAX_POWER_LEVELS-1;
 }
 
 // set the power "level"

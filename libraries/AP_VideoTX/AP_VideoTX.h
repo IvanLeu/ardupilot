@@ -108,6 +108,7 @@ public:
     void set_power_dac(uint16_t power, PowerActive active=PowerActive::Active);
     // add a new dbm setting to those supported
     uint8_t update_power_dbm(uint8_t power, PowerActive active=PowerActive::Active);
+    uint8_t update_power_mw(uint8_t power, PowerActive active=PowerActive::Active);
     void update_all_power_dbm(uint8_t nlevels, const uint8_t levels[]);
     void set_configured_power_mw(uint16_t power);
     uint16_t get_configured_power_mw() const { return _power_mw; }
