@@ -102,7 +102,7 @@ public:
     bool update_frequency() const { return _defaults_set && _frequency_mhz != _current_frequency; }
     void update_configured_frequency();
     // get / set power level
-    void set_power_mw(uint16_t power);
+    void set_power_mw(uint16_t power, PowerActive active=PowerActive::Active);
     void set_power_level(uint8_t level, PowerActive active=PowerActive::Active);
     void set_power_dbm(uint8_t power, PowerActive active=PowerActive::Active);
     void set_power_dac(uint16_t power, PowerActive active=PowerActive::Active);
