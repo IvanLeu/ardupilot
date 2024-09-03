@@ -269,7 +269,7 @@ void AP_VideoTX::update_all_power_dbm(uint8_t nlevels, const uint8_t power[])
 }
 
 // set the power in mw
-void AP_VideoTX::set_power_mw(uint8_t power, PowerActive active)
+void AP_VideoTX::set_power_mw(uint16_t power, PowerActive active)
 {
     if (power == _power_levels[_current_power].mw
         && _power_levels[_current_power].active == active) {
