@@ -127,7 +127,7 @@ char AP_Tramp::handle_response(void)
                 vtx.set_channel(channel);
             }
 
-            vtx.set_power_mw(power, PowerActive::Active);
+            vtx.set_power_mw(power, AP_VideoTX::PowerActive::Active);
             if (pit_mode) {
                 vtx.set_options(vtx.get_options() | uint8_t(AP_VideoTX::VideoOptions::VTX_PITMODE));
             } else {

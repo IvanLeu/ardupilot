@@ -317,7 +317,7 @@ uint8_t AP_VideoTX::update_power_mw(uint8_t power, PowerActive active)
     _power_levels[VTX_MAX_POWER_LEVELS-1].mw = power;
     _power_levels[VTX_MAX_POWER_LEVELS-1].level = 255;
     _power_levels[VTX_MAX_POWER_LEVELS-1].dac = 255;
-    _power_levels[VTX_MAX_POWER_LEVELS-1].dbm = uint16_t(roundf(10 * log10(mw)));
+    _power_levels[VTX_MAX_POWER_LEVELS-1].dbm = uint8_t(roundf(10 * log10(power)));
     _power_levels[VTX_MAX_POWER_LEVELS-1].active = active;
     debug("non-standard power %dmw -> %ddbm", power, _power_levels[VTX_MAX_POWER_LEVELS-1].dbm);
     return VTX_MAX_POWER_LEVELS-1;
