@@ -1,0 +1,52 @@
+stages:
+  - build
+
+stage_build:
+  stage: build
+  tags: 
+    - ardupilot-b
+  image: fogetik/ardupilot-builder:latest
+  script:
+    - sudo bash ./Tools/gittools/submodule-sync.sh    
+    
+    - python ./waf configure --board=CubeOrangePlus --no-submodule-update
+    - python ./waf plane
+
+    - python ./waf configure --board=SpeedyBeeF405WING --no-submodule-update
+    - python ./waf plane
+    
+    - python ./waf configure --board=MatekH743 --no-submodule-update
+    - python ./waf plane   
+
+    - python ./waf configure --color yes --board sitl  --no-submodule-update
+    - python ./waf plane
+    - python ./waf copter 2>&1
+    - python ./waf heli 2>&1
+    - python ./waf rover 2>&1
+    - python ./waf sub 2>&1
+    
+    - cp -v build/sitl/bin/arduplane build/sitl/bin/ArduPlane.elf.exe
+    - cp -v build/sitl/bin/arducopter build/sitl/bin/ArduCopter.elf.exe
+    - cp -v build/sitl/bin/arducopter-heli build/sitl/bin/ArduHeli.elf.exe
+    - cp -v build/sitl/bin/ardurover build/sitl/bin/ArduRover.elf.exe
+    - cp -v build/sitl/bin/ardusub build/sitl/bin/ArduSub.elf.exe
+
+    - cp -v build/sitl/bin/arduplane build/sitl/bin/ArduPlane.elf
+    - cp -v build/sitl/bin/arducopter build/sitl/bin/ArduCopter.elf
+    - cp -v build/sitl/bin/arducopter-heli build/sitl/bin/ArduHeli.elf
+    - cp -v build/sitl/bin/ardurover build/sitl/bin/ArduRover.elf
+    - cp -v build/sitl/bin/ardusub build/sitl/bin/ArduSub.elf
+  
+  artifacts:
+    paths:
+      - build/config.log
+      - build/MatekH743/bin
+      - build/SpeedyBeeF405WING/bin
+      - build/CubeOrangePlus/bin
+      - build/sitl
+  only:
+    refs:
+      - release
+      - test/build-pipeline
+      - /^v\d+\.\d+\.\d+$/
+
